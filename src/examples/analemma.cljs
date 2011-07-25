@@ -1,15 +1,14 @@
-(ns examples.analemma
-  (:use [analemma.charts :only [emit-svg xy-plot add-points]]
-	[analemma.svg]
-	[analemma.xml]
-	[clojure.java.io :only [file]]))
+(ns examples.apogee
+  (:require [apogee.charts :as charts]
+	    [apogee.svg :as svg]
+	    [apogee.xml :as xml]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ANALEMMA CHART
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; http://www.wsanford.com/~wsanford/exo/sundials/analemma_calc.html
-(def analemma-data
+(def ^:export analemma-data
      [[-15.165	-23.07]
       [-17.016	-22.70]
       [-19.171	-22.08]
@@ -84,56 +83,49 @@
       [-11.761	-23.41]
       [-14.691	-23.14]])
 
-(defn analemma [filename]
-  (spit filename
-	(emit-svg
-	 (-> (xy-plot :xmin -30 :xmax 10,
-		      :ymin -30 :ymax 30
-		      :height 500 :width 500)
-	     (add-points analemma-data)))))
+(defn ^:export analemma-chart []
+  (xml/emit
+   (svg/svg
+    (:svg (-> (charts/xy-plot :xmin -30 :xmax 10
+			      :ymin -30 :ymax 30
+			      :height 500 :width 500)
+	      (charts/add-points analemma-data))))))
+
+(defn ^:export analemma-logo []
+  (xml/emit
+   (svg/svg
+    (apply svg/group
+	   (-> (svg/text "Analemma")
+	       (xml/add-attrs :x 120 :y 60)
+	       (svg/style :fill #"000066"
+			  :font-family "Garamond"
+			  :font-size "75px"
+			  :alignment-baseline :middle))
+	   (for [[x y] analemma-data]
+	     (svg/circle (svg/translate-value x -30 5 0 125)
+		     (svg/translate-value y -25 30 125 0)
+		     2 :fill "#000066"))))))
+
+(defn ^:export rotating-analemma-logo []
+  (xml/emit
+   (svg/svg
+    (-> (apply svg/group
+	    (-> (svg/text "Analemma")
+		(xml/add-attrs :x 120 :y 60)
+		(svg/style :fill #"000066"
+			   :font-family "Garamond"
+			   :font-size "75px"
+			   :alignment-baseline :middle))
+	    (for [[x y] analemma-data]
+	      (svg/circle (svg/translate-value x -30 5 0 125)
+			  (svg/translate-value y -25 30 125 0)
+			  2 :fill "#000066")))
+	(svg/animate-transform :begin 0
+			       :dur 20
+			       :type :rotate
+			       :from "0 200 150"
+			       :to "360 200 150"
+			       :repeatCount :indefinite)))))
 
 
-(defn analemma-logo [filename]
-  (spit filename
-	(emit
-	  (svg
-	   (apply group
-		  (-> (text "Analemma")
-		      (add-attrs :x 120 :y 60)
-		      (style :fill #"000066"
-			     :font-family "Garamond"
-			     :font-size "75px"
-			     :alignment-baseline :middle))
-		  (for [[x y] analemma-data]
-		    (circle (translate-value x -30 5 0 125)
-			    (translate-value y -25 30 125 0)
-			    2 :fill "#000066")))))))
 
-(defn rotating-analemma-logo [filename]
-  (spit filename
-	(emit
-	 (svg
-	  (-> (image "file:images/analemma-logo.svg"
-		     :width 500 :height 700)
-	      (animate-transform :begin 0
-					:dur 20
-					:type :rotate
-					:from "0 200 150"
-					:to "360 200 150"
-					:repeatCount :indefinite))))))
-
-
-(defn query-and-transform-analemma [filename]
-  (let [logo (parse-xml (slurp (file "images/analemma-logo.svg")))
-	red-analemma (-> (concat [:g] (filter-xml logo [:g :circle]))
-			 (transform-xml [:circle] #(add-attrs % :fill "#FF0000")))]
-    (spit filename
-	 (emit
-	  (svg
-	   (-> red-analemma
-	       (animate-transform :begin 0
-				  :dur 20
-				  :type :rotate
-				  :from "0 100 100"
-				  :to "360 100 100"
-				  :repeatCount :indefinite)))))))

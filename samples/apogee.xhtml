@@ -1,0 +1,26 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+</head>
+
+<body>
+<script type="text/javascript" src="../apogee.js"></script>
+
+<div id="content"></div>
+
+<!-- below code from http://stackoverflow.com/questions/4023194/how-to-insert-html-string-in-between-two-dom-nodes -->
+<script type="text/javascript">
+var el = document.getElementById("content");
+var html = examples.apogee.analemma_chart();
+
+// Internet Explorer, Opera, Google Chrome and Safari
+if (el.insertAdjacentHTML)
+    el.insertAdjacentHTML ("beforeBegin", html);
+else {
+    var range = document.createRange();
+    var frag = range.createContextualFragment(html);
+    el.parentNode.insertBefore(frag, el);
+}
+</script>
+
+</body>
+</html>

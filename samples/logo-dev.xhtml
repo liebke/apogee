@@ -1,0 +1,33 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+</head>
+
+<body>
+
+<script type="text/javascript" src="../out/goog/base.js"></script>
+<script type="text/javascript" src="../apogee.js"></script>
+  <script type="text/javascript">
+    goog.require('apogee.xml');
+    goog.require('apogee.svg');
+    goog.require('examples.demo');
+  </script>
+
+<div id="demo"></div>
+
+<!-- below code from http://stackoverflow.com/questions/4023194/how-to-insert-html-string-in-between-two-dom-nodes -->
+<script type="text/javascript">
+var el = document.getElementById("demo");
+var html = examples.demo.analemma_logo();
+
+// Internet Explorer, Opera, Google Chrome and Safari
+if (el.insertAdjacentHTML)
+    el.insertAdjacentHTML ("beforeBegin", html);
+else {
+    var range = document.createRange();
+    var frag = range.createContextualFragment(html);
+    el.parentNode.insertBefore(frag, el);
+}
+</script>
+
+</body>
+</html>
