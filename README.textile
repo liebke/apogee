@@ -1,1 +1,10 @@
+h1. Apogee
+
 Apogee is a ClojureScript SVG and charting library.
+
+h2. Getting Started
+
+* run script/build
+* view samples/*.xhtml
+
+
