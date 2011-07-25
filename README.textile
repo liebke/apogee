@@ -4,6 +4,10 @@ Apogee is a ClojureScript SVG and charting library.
 
 h2. Getting Started
 
+* <a href="http://liebke.github.com/apogee/">Samples</a>
+
+<b>To Build</b>
+
 * run script/build
 * view samples/*.xhtml
 
