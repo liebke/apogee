@@ -1,6 +1,0 @@
-#!/bin/sh
-
-export CLOJURESCRIPT_HOME='../clojurescript'
-
-$CLOJURESCRIPT_HOME/bin/cljsc src '{:optimizations :advanced}' > apogee.js
-
