@@ -5,60 +5,60 @@
 ;; XML FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn ^:export has-attrs? [tag]
+(defn has-attrs? [tag]
   (map? (second tag)))
 
-(defn ^:export has-content? [tag]
+(defn has-content? [tag]
   (if (has-attrs? tag)
     (> (count tag) 2)
     (> (count tag) 1)))
 
-(defn ^:export get-name [tag]
+(defn get-name [tag]
   (if-let [n (first tag)]
     (name n)))
 
-(defn ^:export get-attrs [tag]
+(defn get-attrs [tag]
   (if (has-attrs? tag) (second tag) {}))
 
-(defn ^:export get-content [tag]
+(defn get-content [tag]
   (if (has-attrs? tag)
     (drop 2 tag)
     (rest tag)))
 
-(defn ^:export set-attrs [tag attrs]
+(defn set-attrs [tag attrs]
   (concat [(get-name tag) attrs]
 	  (get-content tag)))
 
-(defn ^:export set-content [tag & content]
+(defn set-content [tag & content]
   (concat [(get-name tag) (get-attrs tag)]
 	  content))
 
-(defn ^:export add-attrs [tag & attrs]
+(defn add-attrs [tag & attrs]
   (concat [(get-name tag)
 	   (apply assoc (get-attrs tag) attrs)]
 	  (get-content tag)))
 
-(defn ^:export merge-attrs [tag attrs]
+(defn merge-attrs [tag attrs]
   (concat [(get-name tag)
 	   (merge (get-attrs tag) attrs)]
 	  (get-content tag)))
 
-(defn ^:export add-content [tag & content]
+(defn add-content [tag & content]
   (concat [(get-name tag)
 	   (get-attrs tag)]
 	  (concat (get-content tag)
 		  content)))
 
-(defn ^:export update-attrs [tag [& keys] update-fn & args]
+(defn update-attrs [tag [& keys] update-fn & args]
   (set-attrs tag (apply update-in (get-attrs tag) keys update-fn args)))
 
-(defn ^:export emit-attrs [attrs]
+(defn emit-attrs [attrs]
   (when attrs
     (reduce (fn [s [k v]]
 	      (str s (name k) "=\"" (if (keyword? v) (name v) v) "\" "))
 	    "" attrs)))
 
-(defn ^:export emit-tag [tag]
+(defn emit-tag [tag]
   (if-let [n (get-name tag)]
     (str "<" n " "
 	(emit-attrs (get-attrs tag))
@@ -67,7 +67,7 @@
 	       "</" n ">")
 	  "/>"))))
 
-(defn ^:export emit [& tags]
+(defn emit [& tags]
   (str 
        (reduce #(str %1 (emit-tag %2)) "" tags)))
 
@@ -76,24 +76,24 @@
 ;; FUNCTIONS FOR PARSING XML FILES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;(defn ^:export get-xml-map [xml-string]
+;;(defn get-xml-map [xml-string]
   ;;(xml/parse (ByteArrayInputStream. (.getBytes xml-string "UTF-8"))))
 
-(defn ^:export parse-xml-map [xml-map]
+(defn parse-xml-map [xml-map]
   (if (map? xml-map)
     (let [{:keys [tag attrs content]} xml-map]
       (concat (if attrs [tag attrs] [tag])
 	      (map parse-xml-map content)))
     xml-map))
 
-;;(defn ^:export parse-xml [xml-string]
+;;(defn parse-xml [xml-string]
   ;;(parse-xml-map (get-xml-map xml-string)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; FUNCTIONS FOR FILTERING AND TRANSFORMING PARSED XML
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- ^:export select-loc?
+(defn- select-loc?
   "Provides selector functionality used by filter-xml and transform-xml.
 
     Examples of selectors:
@@ -120,7 +120,7 @@
 		:or (reduce #(or %1 (select-loc? loc %2)) false (next selector))
 		:not (not (select-loc? loc [:or (second selector)]))))))))
 
-(defn ^:export filter-xml [xml-seq [& selectors]]
+(defn filter-xml [xml-seq [& selectors]]
   (let [filter-xml* (fn filter-xml* [zip-loc [selector & child-selectors]]
 		      (loop [nodes [] loc zip-loc]
 			(if (z/end? loc)
@@ -134,7 +134,7 @@
 			   (z/next loc)))))]
     (filter-xml* (z/seq-zip xml-seq) selectors)))
 
-(defn ^:export transform-xml [xml-seq [& selectors] f & args]
+(defn transform-xml [xml-seq [& selectors] f & args]
   (let [transform-xml* (fn transform-xml* [zip-loc [selector & child-selectors] f & args]
 			 (loop [loc zip-loc]
 			   (if (z/end? loc)
